@@ -1,59 +1,26 @@
 version: '3'
 
 vars:
-  INTERNAL_PATH: ./internal
-  BUILD_PATH: ./build
-  CARLY_ENGINE_PATH: ./carly_engine
-  CARLY_HUB_PATH: ./carly_hub
-  S3_BUCKER_NAME: article-bucket
-  DEPLOY_ENV: dev
-
-  BUILD_FILE_NAME: build
-
-  NAME_CARLY_LMB_DOWNLOADER: carly_lmb_downloader
-  NAME_CARLY_LMB_ML: carly_lmb_ml
-  NAME_CARLY_LMB_PARSER: carly_lmb_parser
-  NAME_CARLY_LMB_TRANSLATOR: carly_lmb_translator
+  LMB_DOWNLOADER: 1
+  LMB_PARSER: 1
+  LMB_ML: 1
+  LMB_TRANSLATOR: 1
  
 tasks:
   deploy:
     desc: Deploy project to AWS
     cmds:
-      - task: prep
-      - echo push lambda code files to AWS S3
+      - task: build
+      - task: push
+  
+  push:
+    desc: Push Lambda handler code to AWS
+    cmds:
+      - echo "TASK - Push Lambda handler code to AWS"
+      - ./deploy_lmb.sh {{.LMB_DOWNLOADER}} {{.LMB_PARSER}} {{.LMB_ML}} {{.LMB_TRANSLATOR}}
 
-  prep:
+  build:
     desc: Build Lambda handler code
     cmds:
-      - ./initLmbBuild.sh
-
-  build-lmb-downloader:
-    cmds:
-      - echo started build {{.NAME_CARLY_LMB_DOWNLOADER}} 
-      - cd ./{{.CARLY_ENGINE_PATH}}/{{.NAME_CARLY_LMB_DOWNLOADER}}
-      - ./{{.BUILD_FILE_NAME}}.sh
-      - cd ..
-      - cd ..
-    silent: true
-
-  build-lmb-ml:
-    cmds:
-      - echo started build {{.NAME_CARLY_LMB_ML}} 
-      - ./{{.CARLY_ENGINE_PATH}}/{{.NAME_CARLY_LMB_ML}}/{{.BUILD_FILE_NAME}}.sh
-    silent: true
-
-  build-lmb-translator:
-    cmds:
-      - echo started build {{.NAME_CARLY_LMB_TRANSLATOR}} 
-      - ./{{.CARLY_ENGINE_PATH}}/{{.NAME_CARLY_LMB_TRANSLATOR}}/{{.BUILD_FILE_NAME}}.sh
-    silent: true
-
-  build-lmb-parser:
-    cmds:
-      - echo started build {{.NAME_CARLY_LMB_PARSER}} 
-      - ./{{.CARLY_ENGINE_PATH}}/{{.NAME_CARLY_LMB_PARSER}}/{{.BUILD_FILE_NAME}}.sh
-    silent: true
-
-  go-get-all-dependecies:
-    cmds:
-      - go get -v all
+      - echo "TASK - Build Lambda handler code"
+      - ./build_lmb.sh {{.LMB_DOWNLOADER}} {{.LMB_PARSER}} {{.LMB_ML}} {{.LMB_TRANSLATOR}}
